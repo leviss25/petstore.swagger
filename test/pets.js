@@ -8,7 +8,7 @@ const status = 'available,pending,sold'; //STATUS DE LAS MASCOTAS
 describe("", () => {
     /* CREAR USUARIO */
     it('POST /users', () => {
-        //data para enviar en el post para crear usuario
+        //data body para enviar en el post para crear usuario
         const data ={
             id: 26121988,
             username: "carlleviss",
@@ -19,6 +19,19 @@ describe("", () => {
             phone: "+51973176442",
             userStatus: 1
         }
+
+        //creamos un schema para validar el schema del body request
+        const userSchema = {
+            id: 0,
+            username: '',
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            phone: '',
+            userStatus: 1
+        }
+        
         return request
         .post('user')
         .send(data)
@@ -28,6 +41,14 @@ describe("", () => {
             console.log("message -> ",res.body.message);
             //Esperamos el codigo de estado 200
             expect(res.statusCode).to.be.eq(200);
+            //comparamos el schema de la data enviada en el body
+            const sameSchema = JSON.stringify(Object.keys(userSchema)) === JSON.stringify(Object.keys(data));
+            //Esperamos que sea verdadera (correcta) el schema del body enviado
+            expect(sameSchema).to.be.eq(true);
+            //Esperamos que el message del body de la respuesta no esté vacía
+            expect(res.body.message !== '').to.be.eq(true);
+            //Validamos que el ID sea mayor a cero
+            expect(data.id > 0).to.be.eq(true);
         });
     });
 
@@ -37,9 +58,14 @@ describe("", () => {
         request
         .get(`pet/findByStatus?status=${status}`)
         .then(res =>{
+            //Esperamos que el restudado de body no esté vacío
+            expect(res.body).to.not.be.empty;
+            //Esperamos que el id sea mayor o igual a cero, según documentación de API
+            res.body.forEach(pet => {
+                expect(pet.id >= 0).to.be.eq(true);
+            })
             //Usamos la FUNCION filter para filtrar solo las mascotas vendidas "SOLD"
             const results = res.body.filter(pet => pet.status == "sold");
-            //console.log(results);
             //creamos un array de tupla {id, name}
             const soldBets = [];
             results.forEach(element => {
@@ -67,7 +93,7 @@ class manageSoldPets {
     }
 
     //metodos
-    //metodos para contar con el mismo nombre
+    //metodo para contar con el mismo nombre
     countSameName(){
         const arraySameName = {};
         this._arrayPet.forEach(element => {
