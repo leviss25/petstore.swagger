@@ -60,7 +60,7 @@ describe("", () => {
         .then(res =>{
             //Esperamos que el restudado de body no esté vacío
             expect(res.body).to.not.be.empty;
-            //Esperamos que el id sea mayor o igual a cero, según documentación de API
+            //Esperamos que el id de cada PET sea mayor o igual a cero, según documentación de API
             res.body.forEach(pet => {
                 expect(pet.id >= 0).to.be.eq(true);
             })
